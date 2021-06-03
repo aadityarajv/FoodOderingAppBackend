@@ -10,6 +10,11 @@ import java.io.Serializable;
 
 @Entity
 @Table(name="address")
+@NamedQueries({
+        @NamedQuery(
+                name = "addressByUUID",
+                query = "select a from AddressEntity a where a.uuid=:addressUUID")
+})
 public class AddressEntity  implements Serializable {
 
     @Id
