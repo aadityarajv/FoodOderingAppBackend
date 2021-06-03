@@ -33,4 +33,24 @@ public class CustomerDao {
         entityManager.persist(customerAuthEntity);
         return customerAuthEntity;
     }
+
+    public CustomerAuthEntity getCustomerAuthEntityByAceessToken(String accessToken) {
+        try {
+            return entityManager.createNamedQuery("customerAuthByToken", CustomerAuthEntity.class)
+                    .setParameter("accessToken", accessToken).getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
+     // This method updates the customer details in the database.
+    public CustomerEntity updateCustomer(final CustomerEntity customerEntity) {
+        entityManager.merge(customerEntity);
+        return customerEntity;
+    }
+
+    // This method updates the customers logout time in the database.
+    public CustomerAuthEntity updateCustomerAuth(final CustomerAuthEntity updatedCustomerAuthEntity) {
+        return entityManager.merge(updatedCustomerAuthEntity);
+    }
 }
