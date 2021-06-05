@@ -22,11 +22,11 @@ public class CustomerEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
-    @Column(name = "ID")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "UUID")
+    @Column(name = "uuid")
     private String uuid;
 
     @Column(name = "firstname")
