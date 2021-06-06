@@ -49,6 +49,9 @@ public class CategoryDao {
     }
 
 
-
-
+    public List<CategoryEntity> getAllCategoriesOrderedByName() {
+        return entityManager
+                .createNamedQuery("getAllCategoriesOrderedByName", CategoryEntity.class)
+                .getResultList();
+    }
 }

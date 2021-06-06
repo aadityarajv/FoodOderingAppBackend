@@ -268,11 +268,7 @@ public class RestaurantController {
      * @param authorization Bearer <access-token>
      * @param restaurantUuid UUID of the restaurant whose rating is to be updated.
      * @param customerRating Actual rating value that is to be updated.
-     * @return
-     * @throws AuthorizationFailedException if the given token is not valid.
-     * @throws RestaurantNotFoundException if the restaurant with the given uuid doesn't exist in
-     *     database.
-     * @throws InvalidRatingException if the rating is less than 1 or grater than 5.
+     * @return RestaurantUpdatedResponse
      */
     @RequestMapping(method = RequestMethod.PUT, path = "/api/restaurant/{restaurant_id}")
     public ResponseEntity<?> updateRestaurantRating(@RequestHeader("authorization") final String authorization,
