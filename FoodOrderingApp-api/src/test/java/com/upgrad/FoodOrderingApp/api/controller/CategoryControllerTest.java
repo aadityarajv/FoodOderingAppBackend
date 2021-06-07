@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import static com.upgrad.FoodOrderingApp.service.common.ItemType.NON_VEG;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,7 +56,7 @@ public class CategoryControllerTest {
         categoryEntity.setItems(Collections.singletonList(itemEntity));
 
 
-        when(mockCategoryService.getCategoryById("sampleCategoryId")).thenReturn(categoryEntity);
+        when(mockCategoryService.getCategoryByUuid("sampleCategoryId")).thenReturn(categoryEntity);
 
         final String response = mockMvc
                 .perform(get("/category/sampleCategoryId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
@@ -69,35 +70,35 @@ public class CategoryControllerTest {
         assertEquals(categoryDetailsResponse.getItemList().get(0).getId().toString(), itemId);
         assertEquals(categoryDetailsResponse.getItemList().get(0).getPrice().intValue(), 200);
         assertEquals(categoryDetailsResponse.getItemList().get(0).getItemType().toString(), "NON_VEG");
-        verify(mockCategoryService, times(1)).getCategoryById("sampleCategoryId");
+        verify(mockCategoryService, times(1)).getCategoryByUuid("sampleCategoryId");
     }
 
     //This test case passes when you have handled the exception of trying to fetch any category but your category id
     // field is empty.
     @Test
     public void shouldNotGetCategoryByidIfCategoryIdIsEmpty() throws Exception {
-        when(mockCategoryService.getCategoryById(anyString()))
+        when(mockCategoryService.getCategoryByUuid(anyString()))
                 .thenThrow(new CategoryNotFoundException("CNF-001", "Category id field should not be empty"));
 
         mockMvc
                 .perform(get("/category/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("CNF-001"));
-        verify(mockCategoryService, times(1)).getCategoryById(anyString());
+        verify(mockCategoryService, times(1)).getCategoryByUuid(anyString());
     }
 
     //This test case passes when you have handled the exception of trying to fetch any category by its id, while there
     // is not category by that id in the database
     @Test
     public void shouldNotGetCategoryByIdIfCategoryDoesNotExistAgainstGivenId() throws Exception {
-        when(mockCategoryService.getCategoryById("someCategory"))
+        when(mockCategoryService.getCategoryByUuid("someCategory"))
                 .thenThrow(new CategoryNotFoundException("CNF-002", "No category by this id"));
 
         mockMvc
                 .perform(get("/category/someCategory").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("CNF-002"));
-        verify(mockCategoryService, times(1)).getCategoryById("someCategory");
+        verify(mockCategoryService, times(1)).getCategoryByUuid("someCategory");
     }
 
     //This test case passes when you are able to fetch the list of all categories ordered by their name.
