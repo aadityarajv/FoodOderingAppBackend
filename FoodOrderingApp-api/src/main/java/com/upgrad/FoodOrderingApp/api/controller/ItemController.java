@@ -43,7 +43,7 @@ public class ItemController {
             restaurantEntity = restaurantService.restaurantByUuid(restaurantUuid);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         List<ItemEntity> itemEntities = itemService.getItemsByPopularity(restaurantEntity);

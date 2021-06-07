@@ -33,37 +33,39 @@ public class CustomerService {
     public CustomerEntity registerCustomer(CustomerEntity customerEntity) throws SignUpRestrictedException {
 
         if (
-                customerEntity.getFirstName().equals("") ||
-                        customerEntity.getEmail().equals("") ||
-                        customerEntity.getContactNumber().equals("") ||
-                        customerEntity.getPassword().equals("")
+                        !customerEntity.getFirstName().isEmpty() &&
+                        !customerEntity.getEmail().isEmpty() &&
+                        !customerEntity.getContactNumber().isEmpty() &&
+                        !customerEntity.getPassword().isEmpty()
         ) {
+            // Check if Contact Is Valid
+            if(!isValidContactNumber(customerEntity.getContactNumber())) {
+                System.out.println("!isValid: ");
+                throw new SignUpRestrictedException(SGR_003.getCode(), SGR_003.getDefaultMessage());
+            }
+
+            // Check if Contact Is exists in database
+            if (isPhoneNumberExist(customerEntity.getContactNumber())) {
+                throw new SignUpRestrictedException(SGR_001.getCode(), SAR_001.getDefaultMessage());
+            }
+
+            // Check if Email is Valid (right format)
+            if (!isValidEmail(customerEntity.getEmail())) {
+                throw new SignUpRestrictedException(SGR_002.getCode(), SGR_002.getDefaultMessage());
+            }
+
+            if (!isAStrongPassword(customerEntity.getPassword()))
+                throw new SignUpRestrictedException(SGR_004.getCode(), SGR_004.getDefaultMessage());
+
+
+            String[] encryptedText = passwordCryptographyProvider.encrypt(customerEntity.getPassword());
+            customerEntity.setSalt(encryptedText[0]);
+            customerEntity.setPassword(encryptedText[1]);
+            return customerDAO.registerCustomer(customerEntity);
+        } else {
             throw new SignUpRestrictedException(SGR_005.getCode(), SGR_005.getDefaultMessage());
         }
 
-        // Check if Contact Is Valid
-        if(!isValidContactNumber(customerEntity.getContactNumber())) {
-            throw new SignUpRestrictedException(SGR_003.getCode(), SGR_003.getDefaultMessage());
-        }
-
-        // Check if Contact Is exists in database
-        if (isPhoneNumberExist(customerEntity.getContactNumber())) {
-            throw new SignUpRestrictedException(SGR_001.getCode(), SAR_001.getDefaultMessage());
-        }
-
-        // Check if Email is Valid (right format)
-        if (!isValidEmail(customerEntity.getEmail())) {
-            throw new SignUpRestrictedException(SGR_002.getCode(), SGR_002.getDefaultMessage());
-        }
-
-        if (!isAStrongPassword(customerEntity.getPassword()))
-            throw new SignUpRestrictedException(SGR_004.getCode(), SGR_004.getDefaultMessage());
-
-        customerEntity.setUuid(UUID.randomUUID().toString());
-        String[] encryptedText = passwordCryptographyProvider.encrypt(customerEntity.getPassword());
-        customerEntity.setSalt(encryptedText[0]);
-        customerEntity.setPassword(encryptedText[1]);
-        return customerDAO.registerCustomer(customerEntity);
     }
 
 
@@ -161,13 +163,9 @@ public class CustomerService {
 
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public CustomerEntity updateCustomerPassword(String accessToken, String oldPassword, String newPassword) throws UpdateCustomerException, AuthorizationFailedException {
+    public CustomerEntity updateCustomerPassword(String oldPassword, String newPassword, CustomerEntity customerEntity) throws UpdateCustomerException, AuthorizationFailedException {
 
-        // Check if provided password are not null
-        if(oldPassword.length() == 0 || newPassword.length() == 0) {
-            throw new UpdateCustomerException(UCR_003.getCode(), UCR_003.getDefaultMessage());
-        }
-        CustomerEntity customerEntity = getCustomerEntityByAccessToken(accessToken);
+
 
         if(!isAStrongPassword(newPassword))
             throw new UpdateCustomerException(UCR_001.getCode(), UCR_001.getDefaultMessage());

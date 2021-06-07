@@ -49,7 +49,7 @@ public class CategoryController {
             categoryEntity = categoryService.getCategoryByUuid(categoryUuid);
         } catch (CategoryNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         CategoryDetailsResponse categoryDetailsResponse = new CategoryDetailsResponse();

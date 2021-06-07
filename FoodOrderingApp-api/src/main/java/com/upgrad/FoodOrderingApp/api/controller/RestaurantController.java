@@ -97,7 +97,7 @@ public class RestaurantController {
             restaurantEntityList = restaurantService.restaurantsByName(restaurantName);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
@@ -160,7 +160,7 @@ public class RestaurantController {
             }
         } catch (CategoryNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
@@ -216,7 +216,7 @@ public class RestaurantController {
             restaurantEntity = restaurantService.restaurantByUuid(restaurantUuid);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantDetailsResponseAddressState restaurantDetailsResponseAddressState = new RestaurantDetailsResponseAddressState()
@@ -287,7 +287,7 @@ public class RestaurantController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
-            return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -300,7 +300,7 @@ public class RestaurantController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         } catch (InvalidRatingException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
