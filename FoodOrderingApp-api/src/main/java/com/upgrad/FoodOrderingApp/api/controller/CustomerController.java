@@ -20,6 +20,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 import static com.upgrad.FoodOrderingApp.service.common.GenericErrorCode.*;
 
@@ -42,24 +43,34 @@ public class CustomerController {
     @RequestMapping(method = RequestMethod.POST, path = "/customer/signup")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupCustomerRequest signupCustomerRequest) {
 
-
         CustomerEntity customerEntity = new CustomerEntity();
-        customerEntity.setFirstName(signupCustomerRequest.getFirstName());
-        customerEntity.setLastName(signupCustomerRequest.getLastName());
-        customerEntity.setEmail(signupCustomerRequest.getEmailAddress());
-        customerEntity.setContactNumber(signupCustomerRequest.getContactNumber());
-        customerEntity.setPassword(signupCustomerRequest.getPassword());
 
-        CustomerEntity res = null;
         try {
-            res = customerService.registerCustomer(customerEntity);
+
+            if(signupCustomerRequest.getFirstName().isEmpty() || signupCustomerRequest.getContactNumber().isEmpty()
+                    || signupCustomerRequest.getEmailAddress().isEmpty() || signupCustomerRequest.getPassword().isEmpty()
+            ) {
+                throw new SignUpRestrictedException(SGR_005.getCode(), SGR_005.getDefaultMessage());
+            }
+            customerEntity.setUuid(UUID.randomUUID().toString());
+            customerEntity.setFirstName(signupCustomerRequest.getFirstName());
+            customerEntity.setLastName(signupCustomerRequest.getLastName());
+            customerEntity.setEmail(signupCustomerRequest.getEmailAddress());
+            customerEntity.setContactNumber(signupCustomerRequest.getContactNumber());
+            customerEntity.setPassword(signupCustomerRequest.getPassword());
+
+            customerEntity = customerService.registerCustomer(customerEntity);
+
+
         } catch (SignUpRestrictedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<SignupCustomerResponse>(
-                new SignupCustomerResponse().id(res.getUuid()).status("CUSTOMER SUCCESSFULLY REGISTERED"), HttpStatus.CREATED);
+
+        SignupCustomerResponse signupCustomerResponse = new SignupCustomerResponse().id(customerEntity.getUuid()).status("CUSTOMER SUCCESSFULLY REGISTERED");
+
+        return new ResponseEntity<SignupCustomerResponse>(signupCustomerResponse, HttpStatus.CREATED);
 
     }
 
@@ -86,7 +97,7 @@ public class CustomerController {
             }
         } catch (AuthenticationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATH_004.getCode()).message(ATH_004.getDefaultMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
@@ -96,7 +107,7 @@ public class CustomerController {
             customerAuthEntity = customerService.authenticate(decodedArray[0], decodedArray[1]);
         } catch (AuthenticationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setId(customerAuthEntity.getCustomer().getUuid());
@@ -118,7 +129,7 @@ public class CustomerController {
     @RequestMapping(method = RequestMethod.POST, path = "/customer/logout")
     public ResponseEntity<?> customerLogout(@RequestHeader("authorization")String authorization) {
         String accessToken;
-        CustomerAuthEntity customerAuthEntity = null;
+        CustomerAuthEntity customerAuthEntity;
         try {
             accessToken = authorization.split("Bearer ")[1];
             if(accessToken == null) {
@@ -126,25 +137,32 @@ public class CustomerController {
             }
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
         }
         try {
             customerAuthEntity = customerService.logoutCustomer(accessToken);
+
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         }
 
-        return new ResponseEntity<LogoutResponse>(new LogoutResponse().id(customerAuthEntity.getUuid()).message("LOGGED OUT SUCCESSFULLY"), HttpStatus.OK);
+        LogoutResponse logoutResponse = new LogoutResponse().id(customerAuthEntity.getCustomer().getUuid()).message("LOGGED OUT SUCCESSFULLY");
+
+        return new ResponseEntity<LogoutResponse>(logoutResponse, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.PUT, path = "/customer")
     public ResponseEntity<?> updateCustomer(@RequestHeader("authorization")String authorization, @Valid @RequestBody UpdateCustomerRequest updateCustomerRequest) {
         String accessToken;
         CustomerEntity customerEntity;
+        if(updateCustomerRequest.getFirstName().equals("")) {
+            ErrorResponse errorResponse = new ErrorResponse().code(UCR_002.getCode()).message(UCR_002.getDefaultMessage());
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        }
         try {
             accessToken = authorization.split("Bearer ")[1];
             if(accessToken == null) {
@@ -155,13 +173,10 @@ public class CustomerController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
-            return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
-        }
-
-        if(updateCustomerRequest.getFirstName().equals("")) {
-            ErrorResponse errorResponse = new ErrorResponse().code(UCR_002.getCode()).message(UCR_002.getDefaultMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
+
+
 
         try {
             customerEntity = customerService.getCustomerEntityByAccessToken(accessToken);
@@ -185,9 +200,17 @@ public class CustomerController {
     @RequestMapping(method = RequestMethod.PUT, path = "/customer/password")
     public ResponseEntity<?> updateCustomerPassword(@RequestHeader("authorization")String authorization, @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
 
+
+
         String accessToken;
         CustomerEntity customerEntity;
         try {
+
+            // Check if provided password are not null
+            if(updatePasswordRequest.getOldPassword().length() == 0 || updatePasswordRequest.getNewPassword().length() == 0) {
+                throw new UpdateCustomerException(UCR_003.getCode(), UCR_003.getDefaultMessage());
+            }
+
             accessToken = authorization.split("Bearer ")[1];
             if(accessToken == null) {
                 throw new AuthorizationFailedException(ATHR_005.getCode(), ATHR_005.getDefaultMessage());
@@ -197,18 +220,22 @@ public class CustomerController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
-            return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+        } catch (UpdateCustomerException e) {
+            ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         try {
-            customerEntity = customerService.updateCustomerPassword(accessToken, updatePasswordRequest.getOldPassword(), updatePasswordRequest.getNewPassword());
+            customerEntity = customerService.getCustomerEntityByAccessToken(accessToken);
 
+            customerEntity = customerService.updateCustomerPassword(updatePasswordRequest.getOldPassword(), updatePasswordRequest.getNewPassword(), customerEntity);
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (UpdateCustomerException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<UpdatePasswordResponse>(new UpdatePasswordResponse()

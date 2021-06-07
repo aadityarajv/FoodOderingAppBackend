@@ -48,10 +48,10 @@ public class AddressController {
             }
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
-            return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -68,17 +68,15 @@ public class AddressController {
 
             addressEntity.setState(addressService.getStateByUuid(saveAddressRequest.getStateUuid()));
 
+            // Saving address entity
+            addressEntity = addressService.saveAddress(addressEntity, customerEntity);
+
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (AddressNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            addressEntity = addressService.saveAddress(addressEntity, customerEntity);
-
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         } catch (SaveAddressException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -106,7 +104,7 @@ public class AddressController {
             }
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
@@ -183,7 +181,7 @@ public class AddressController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (AddressNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         deletedAddress = addressService.deleteAddress(addressEntity);

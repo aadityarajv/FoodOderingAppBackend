@@ -97,7 +97,7 @@ public class RestaurantController {
             restaurantEntityList = restaurantService.restaurantsByName(restaurantName);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
@@ -160,7 +160,7 @@ public class RestaurantController {
             }
         } catch (CategoryNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantListResponse restaurantListResponse = new RestaurantListResponse();
@@ -216,7 +216,7 @@ public class RestaurantController {
             restaurantEntity = restaurantService.restaurantByUuid(restaurantUuid);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         }
 
         RestaurantDetailsResponseAddressState restaurantDetailsResponseAddressState = new RestaurantDetailsResponseAddressState()
@@ -268,11 +268,7 @@ public class RestaurantController {
      * @param authorization Bearer <access-token>
      * @param restaurantUuid UUID of the restaurant whose rating is to be updated.
      * @param customerRating Actual rating value that is to be updated.
-     * @return
-     * @throws AuthorizationFailedException if the given token is not valid.
-     * @throws RestaurantNotFoundException if the restaurant with the given uuid doesn't exist in
-     *     database.
-     * @throws InvalidRatingException if the rating is less than 1 or grater than 5.
+     * @return RestaurantUpdatedResponse
      */
     @RequestMapping(method = RequestMethod.PUT, path = "/api/restaurant/{restaurant_id}")
     public ResponseEntity<?> updateRestaurantRating(@RequestHeader("authorization") final String authorization,
@@ -291,7 +287,7 @@ public class RestaurantController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
-            return new ResponseEntity<>(errorResponse,HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -304,7 +300,7 @@ public class RestaurantController {
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (RestaurantNotFoundException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
         } catch (InvalidRatingException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
             return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
