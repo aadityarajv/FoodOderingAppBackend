@@ -48,7 +48,7 @@ public class AddressController {
             }
         } catch (AuthorizationFailedException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(e.getCode()).message(e.getErrorMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (ArrayIndexOutOfBoundsException e) {
             ErrorResponse errorResponse = new ErrorResponse().code(ATHR_005.getCode()).message(ATHR_005.getDefaultMessage());
             return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
