@@ -46,7 +46,7 @@ public class CustomerService {
 
             // Check if Contact Is exists in database
             if (isPhoneNumberExist(customerEntity.getContactNumber())) {
-                throw new SignUpRestrictedException(SGR_001.getCode(), SAR_001.getDefaultMessage());
+                throw new SignUpRestrictedException(SGR_001.getCode(), SGR_001.getDefaultMessage());
             }
 
             // Check if Email is Valid (right format)
