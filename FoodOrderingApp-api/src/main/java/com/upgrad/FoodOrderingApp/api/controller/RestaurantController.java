@@ -21,6 +21,7 @@ import org.springframework.web.context.request.RequestScope;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -206,7 +207,6 @@ public class RestaurantController {
      * @throws RestaurantNotFoundException if the restaurant with the UUID is not found in the
      *     database.
      */
-
     @RequestMapping(method = RequestMethod.GET, path = "/api/restaurant/{restaurant_id}")
     public ResponseEntity<?> getRestaurantByUuid(@PathVariable("restaurant_id") final String restaurantUuid) {
 
