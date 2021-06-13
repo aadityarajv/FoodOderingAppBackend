@@ -207,7 +207,7 @@ public class RestaurantController {
      * @throws RestaurantNotFoundException if the restaurant with the UUID is not found in the
      *     database.
      */
-    @RequestMapping(method = RequestMethod.GET, path = "/api/restaurant/{restaurant_id}")
+    @RequestMapping(method = RequestMethod.GET, path = "/restaurant/{restaurant_id}")
     public ResponseEntity<?> getRestaurantByUuid(@PathVariable("restaurant_id") final String restaurantUuid) {
 
         RestaurantEntity restaurantEntity;
@@ -270,7 +270,7 @@ public class RestaurantController {
      * @param customerRating Actual rating value that is to be updated.
      * @return RestaurantUpdatedResponse
      */
-    @RequestMapping(method = RequestMethod.PUT, path = "/api/restaurant/{restaurant_id}")
+    @RequestMapping(method = RequestMethod.PUT, path = "/restaurant/{restaurant_id}")
     public ResponseEntity<?> updateRestaurantRating(@RequestHeader("authorization") final String authorization,
                                                     @PathVariable("restaurant_id") final String restaurantUuid,
                                                     @RequestParam("customer_rating") final Double customerRating) {

@@ -78,7 +78,7 @@ public class RestaurantControllerTest {
                 .thenReturn(Collections.singletonList(itemEntity));
 
         mockMvc
-                .perform(get("/api/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("id").value(restaurantEntity.getUuid()))
                 .andExpect(jsonPath("restaurant_name").value("Famous Restaurant"))
@@ -98,7 +98,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty"));
 
         mockMvc
-                .perform(get("/api/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-002"));
         verify(mockRestaurantService, times(1)).restaurantByUuid(anyString());
@@ -112,7 +112,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-001", "No restaurant by this id"));
 
         mockMvc
-                .perform(get("/api/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .perform(get("/restaurant/someRestaurantId").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-001"));
         verify(mockRestaurantService, times(1)).restaurantByUuid("someRestaurantId");
@@ -272,7 +272,7 @@ public class RestaurantControllerTest {
                 .thenReturn(new RestaurantEntity());
 
         mockMvc
-                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=4.5")
+                .perform(put("/restaurant/" + restaurantId + "?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isOk())
@@ -291,7 +291,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-001", "Customer is not Logged in."));
 
         mockMvc
-                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -309,7 +309,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-002", "Customer is logged out. Log in again to access this endpoint."));
 
         mockMvc
-                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -327,7 +327,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new AuthorizationFailedException("ATHR-003", "Your session is expired. Log in again to access this endpoint."));
 
         mockMvc
-                .perform(put("/api/restaurant/someRestaurantId/?customer_rating=4.5")
+                .perform(put("/restaurant/someRestaurantId/?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer invalid_auth"))
                 .andExpect(status().isForbidden())
@@ -348,7 +348,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-002", "Restaurant id field should not be empty"));
 
         mockMvc
-                .perform(get("/api/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .perform(get("/restaurant/emptyString").contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("code").value("RNF-002"));
@@ -369,7 +369,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new RestaurantNotFoundException("RNF-001", "No restaurant by this id"));
 
         mockMvc
-                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=4.5")
+                .perform(put("/restaurant/" + restaurantId + "?customer_rating=4.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isNotFound())
@@ -396,7 +396,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new InvalidRatingException("IRE-001", "Rating should be in the range of 1 to 5"));
 
         mockMvc
-                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=-5.5")
+                .perform(put("/restaurant/" + restaurantId + "?customer_rating=-5.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isBadRequest())
@@ -423,7 +423,7 @@ public class RestaurantControllerTest {
                 .thenThrow(new InvalidRatingException("IRE-001", "Rating should be in the range of 1 to 5"));
 
         mockMvc
-                .perform(put("/api/restaurant/" + restaurantId + "?customer_rating=5.5")
+                .perform(put("/restaurant/" + restaurantId + "?customer_rating=5.5")
                         .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                         .header("authorization", "Bearer database_accesstoken2"))
                 .andExpect(status().isBadRequest())
